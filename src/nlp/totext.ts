@@ -2,7 +2,7 @@ import ENGLISH, { Language } from './i18n'
 import { RRule } from '../rrule'
 import { Options, ByWeekday } from '../types'
 import { Weekday } from '../weekday'
-import { isArray, isNumber, isPresent } from '../helpers'
+import { isArray, isNumber, isPresent, isWeekdayStr } from '../helpers'
 
 // =============================================================================
 // Helper functions
@@ -82,9 +82,11 @@ export default class ToText {
     }
 
     if (isPresent(this.origOptions.byweekday)) {
-      const byweekday = !isArray(this.origOptions.byweekday)
-        ? [this.origOptions.byweekday]
-        : this.origOptions.byweekday
+      const byweekday = (
+        !isArray(this.origOptions.byweekday)
+          ? [this.origOptions.byweekday]
+          : this.origOptions.byweekday
+      ).map((wday) => (isWeekdayStr(wday) ? Weekday.fromStr(wday) : wday))
       const days = String(byweekday)
 
       this.byweekday = {

@@ -77,6 +77,74 @@ describe('NLP', () => {
     expect(rrule.toString()).toBe('RRULE:FREQ=WEEKLY;BYDAY=MO')
   })
 
+  it('permits strings in byweekday', () => {
+    const rrule = new RRule({
+      freq: RRule.WEEKLY,
+      byweekday: ['MO', 'FR'],
+      count: 3,
+    })
+
+    expect(rrule.toText()).toBe('every week on Monday, Friday for 3 times')
+    expect(rrule.toString()).toBe('RRULE:FREQ=WEEKLY;BYDAY=MO,FR;COUNT=3')
+    expect(rrule.isFullyConvertibleToText()).toBe(
+      new RRule({
+        freq: RRule.WEEKLY,
+        byweekday: [RRule.MO, RRule.FR],
+        count: 3,
+      }).isFullyConvertibleToText()
+    )
+  })
+
+  it('permits a single string in byweekday', () => {
+    const rrule = new RRule({
+      freq: RRule.WEEKLY,
+      byweekday: 'TU',
+      count: 3,
+    })
+
+    expect(rrule.toText()).toBe('every week on Tuesday for 3 times')
+    expect(rrule.toString()).toBe('RRULE:FREQ=WEEKLY;BYDAY=TU;COUNT=3')
+  })
+
+  it('permits a mix of strings and Weekday objects in byweekday', () => {
+    const rrule = new RRule({
+      freq: RRule.MONTHLY,
+      byweekday: ['MO', RRule.FR.nth(-1)],
+      count: 3,
+    })
+
+    expect(rrule.toText()).toBe(
+      'every month on Monday and on the last Friday for 3 times'
+    )
+    expect(rrule.toString()).toBe('RRULE:FREQ=MONTHLY;BYDAY=MO,-1FR;COUNT=3')
+  })
+
+  it('permits strings in byweekday with a daily frequency', () => {
+    const rrule = new RRule({
+      freq: RRule.DAILY,
+      byweekday: ['SA', 'SU'],
+      count: 3,
+    })
+
+    expect(rrule.toText()).toBe(
+      new RRule({
+        freq: RRule.DAILY,
+        byweekday: [RRule.SA, RRule.SU],
+        count: 3,
+      }).toText()
+    )
+  })
+
+  it('shows correct text for weekdays given as strings', () => {
+    const rrule = new RRule({
+      freq: RRule.WEEKLY,
+      byweekday: ['MO', 'TU', 'WE', 'TH', 'FR'],
+      count: 3,
+    })
+
+    expect(rrule.toText()).toBe('every weekday for 3 times')
+  })
+
   it('sorts monthdays correctly (#101)', () => {
     const options = { freq: 2, bymonthday: [3, 10, 17, 24] }
     const rule = new RRule(options)

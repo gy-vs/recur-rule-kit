@@ -531,6 +531,27 @@ describe('RRuleSet', function () {
       expect(set.toString()).toEqual('RDATE:19610201T090000Z,19610301T090000Z')
     })
 
+    it('stringifies an rrule with weekday strings in byweekday', () => {
+      const set = new RRuleSet()
+
+      set.rrule(
+        new RRule({
+          freq: RRule.WEEKLY,
+          byweekday: ['MO', 'FR'],
+          count: 3,
+          dtstart: parse('20240101T090000'),
+        })
+      )
+
+      expect(set.toString()).toBe(
+        'DTSTART:20240101T090000Z\nRRULE:FREQ=WEEKLY;BYDAY=MO,FR;COUNT=3'
+      )
+
+      const set2 = rrulestr(set.toString())
+      expect(set2.toString()).toBe(set.toString())
+      expect(set2.all()).toEqual(set.all())
+    })
+
     it('parses RDATE strings without an RRULE', () => {
       const set = rrulestr(
         'RDATE;TZID=America/New_York:19610201T090000,19610301T090000'

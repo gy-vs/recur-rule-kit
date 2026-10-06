@@ -3890,6 +3890,85 @@ describe('RRule', function () {
     })
   })
 
+  describe('byweekday as strings', () => {
+    it('serializes an array of weekday strings like Weekday objects', () => {
+      const rule = new RRule({
+        freq: RRule.WEEKLY,
+        byweekday: ['MO', 'FR'],
+        count: 3,
+        dtstart: datetime(2024, 1, 1, 9, 0, 0),
+      })
+
+      expect(rule.toString()).toBe(
+        'DTSTART:20240101T090000Z\nRRULE:FREQ=WEEKLY;BYDAY=MO,FR;COUNT=3'
+      )
+      expect(rule.all()).toEqual([
+        datetime(2024, 1, 1, 9, 0, 0),
+        datetime(2024, 1, 5, 9, 0, 0),
+        datetime(2024, 1, 8, 9, 0, 0),
+      ])
+
+      const parsed = rrulestr(rule.toString())
+      expect(parsed.all()).toEqual(rule.all())
+    })
+
+    it('serializes a single weekday string like a Weekday object', () => {
+      const rule = new RRule({
+        freq: RRule.WEEKLY,
+        byweekday: 'TU',
+        count: 3,
+        dtstart: datetime(2024, 1, 1, 9, 0, 0),
+      })
+
+      expect(rule.toString()).toBe(
+        'DTSTART:20240101T090000Z\nRRULE:FREQ=WEEKLY;BYDAY=TU;COUNT=3'
+      )
+      expect(rule.all()).toEqual(
+        new RRule({
+          freq: RRule.WEEKLY,
+          byweekday: RRule.TU,
+          count: 3,
+          dtstart: datetime(2024, 1, 1, 9, 0, 0),
+        }).all()
+      )
+    })
+
+    it('serializes a mix of weekday strings and Weekday objects', () => {
+      const rule = new RRule({
+        freq: RRule.MONTHLY,
+        byweekday: ['MO', RRule.FR.nth(-1)],
+        count: 3,
+        dtstart: datetime(2024, 1, 1, 9, 0, 0),
+      })
+
+      expect(rule.toString()).toBe(
+        'DTSTART:20240101T090000Z\nRRULE:FREQ=MONTHLY;BYDAY=MO,-1FR;COUNT=3'
+      )
+      expect(rule.all()).toEqual(
+        new RRule({
+          freq: RRule.MONTHLY,
+          byweekday: [RRule.MO, RRule.FR.nth(-1)],
+          count: 3,
+          dtstart: datetime(2024, 1, 1, 9, 0, 0),
+        }).all()
+      )
+
+      const parsed = rrulestr(rule.toString())
+      expect(parsed.all()).toEqual(rule.all())
+    })
+
+    it('keeps the original strings in origOptions', () => {
+      const rule = new RRule({
+        freq: RRule.WEEKLY,
+        byweekday: ['MO', 'FR'],
+        count: 3,
+        dtstart: datetime(2024, 1, 1, 9, 0, 0),
+      })
+
+      expect(rule.origOptions.byweekday).toEqual(['MO', 'FR'])
+    })
+  })
+
   it('testByHourValues', function () {
     ;[
       [

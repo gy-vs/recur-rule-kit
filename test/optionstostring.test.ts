@@ -32,6 +32,27 @@ describe('optionsToString', () => {
         },
         'DTSTART;TZID=America/New_York:19970902T090000\n' + 'RRULE:FREQ=WEEKLY',
       ],
+      [
+        {
+          freq: RRule.WEEKLY,
+          byweekday: ['MO', 'FR'],
+        },
+        'RRULE:FREQ=WEEKLY;BYDAY=MO,FR',
+      ],
+      [
+        {
+          freq: RRule.WEEKLY,
+          byweekday: 'TU',
+        },
+        'RRULE:FREQ=WEEKLY;BYDAY=TU',
+      ],
+      [
+        {
+          freq: RRule.MONTHLY,
+          byweekday: ['MO', RRule.FR.nth(-1)],
+        },
+        'RRULE:FREQ=MONTHLY;BYDAY=MO,-1FR',
+      ],
     ]
 
     expectations.forEach(function (item) {
