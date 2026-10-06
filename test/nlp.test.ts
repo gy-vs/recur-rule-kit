@@ -77,6 +77,92 @@ describe('NLP', () => {
     expect(rrule.toString()).toBe('RRULE:FREQ=WEEKLY;BYDAY=MO')
   })
 
+  it('permits weekday strings in byweekday', () => {
+    const rrule = new RRule({
+      freq: RRule.WEEKLY,
+      byweekday: ['MO', 'FR'],
+      count: 3,
+      dtstart: datetime(2024, 1, 1, 9, 0, 0),
+    })
+
+    expect(rrule.toText()).toBe('every week on Monday, Friday for 3 times')
+    expect(rrule.toString()).toBe(
+      'DTSTART:20240101T090000Z\nRRULE:FREQ=WEEKLY;BYDAY=MO,FR;COUNT=3'
+    )
+  })
+
+  it('permits a single weekday string in byweekday', () => {
+    const rrule = new RRule({
+      freq: RRule.WEEKLY,
+      byweekday: 'TU',
+      count: 3,
+      dtstart: datetime(2024, 1, 1, 9, 0, 0),
+    })
+
+    expect(rrule.toText()).toBe('every week on Tuesday for 3 times')
+    expect(rrule.toString()).toBe(
+      'DTSTART:20240101T090000Z\nRRULE:FREQ=WEEKLY;BYDAY=TU;COUNT=3'
+    )
+  })
+
+  it('permits a mix of weekday strings and Weekday objects in byweekday', () => {
+    const rrule = new RRule({
+      freq: RRule.MONTHLY,
+      byweekday: ['MO', RRule.FR.nth(-1)],
+      count: 3,
+      dtstart: datetime(2024, 1, 1, 9, 0, 0),
+    })
+
+    expect(rrule.toText()).toBe(
+      'every month on Monday and on the last Friday for 3 times'
+    )
+    expect(rrule.toString()).toBe(
+      'DTSTART:20240101T090000Z\nRRULE:FREQ=MONTHLY;BYDAY=MO,-1FR;COUNT=3'
+    )
+  })
+
+  it('permits weekday strings in byweekday with a daily frequency', () => {
+    const rrule = new RRule({
+      freq: RRule.DAILY,
+      byweekday: ['SA', 'SU'],
+      count: 3,
+      dtstart: datetime(2024, 1, 1, 9, 0, 0),
+    })
+
+    expect(rrule.toText()).toBe('every day on Saturday, Sunday for 3 times')
+  })
+
+  it('detects weekdays given as weekday strings', () => {
+    const rrule = new RRule({
+      freq: RRule.WEEKLY,
+      byweekday: ['MO', 'TU', 'WE', 'TH', 'FR'],
+      count: 3,
+      dtstart: datetime(2024, 1, 1, 9, 0, 0),
+    })
+
+    expect(rrule.toText()).toBe('every weekday for 3 times')
+  })
+
+  it('converts weekday strings to text exactly like Weekday objects', () => {
+    const stringRule = new RRule({
+      freq: RRule.WEEKLY,
+      byweekday: ['MO', 'FR'],
+      count: 3,
+      dtstart: datetime(2024, 1, 1, 9, 0, 0),
+    })
+    const objectRule = new RRule({
+      freq: RRule.WEEKLY,
+      byweekday: [RRule.MO, RRule.FR],
+      count: 3,
+      dtstart: datetime(2024, 1, 1, 9, 0, 0),
+    })
+
+    expect(stringRule.isFullyConvertibleToText()).toBe(
+      objectRule.isFullyConvertibleToText()
+    )
+    expect(stringRule.toText()).toBe(objectRule.toText())
+  })
+
   it('sorts monthdays correctly (#101)', () => {
     const options = { freq: 2, bymonthday: [3, 10, 17, 24] }
     const rule = new RRule(options)

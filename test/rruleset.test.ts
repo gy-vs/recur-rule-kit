@@ -431,6 +431,30 @@ describe('RRuleSet', function () {
       ])
     })
 
+    it('generates rrule strings for rules with weekday strings', () => {
+      const set = new RRuleSet()
+
+      set.rrule(
+        new RRule({
+          freq: RRule.WEEKLY,
+          byweekday: ['MO', 'FR'],
+          count: 3,
+          dtstart: parse('20240101T090000'),
+        })
+      )
+
+      expect(set.valueOf()).toEqual([
+        'DTSTART:20240101T090000Z',
+        'RRULE:FREQ=WEEKLY;BYDAY=MO,FR;COUNT=3',
+      ])
+      expect(set.toString()).toBe(
+        'DTSTART:20240101T090000Z\nRRULE:FREQ=WEEKLY;BYDAY=MO,FR;COUNT=3'
+      )
+
+      const parsed = rrulestr(set.toString(), { forceset: true })
+      expect(parsed.all()).toEqual(set.all())
+    })
+
     it('generates multiline rules', () => {
       const set = new RRuleSet()
 
